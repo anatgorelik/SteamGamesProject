@@ -1,0 +1,446 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Steam Games</title>
+
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1f3b2d;
+        }
+
+        .top-bar {
+            width: 100%;
+            padding: 15px 25px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hello-user {
+            color: #f8f3e8;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #logoutBtn {
+            background-color: #f3e9d2;
+            color: #1f3b2d;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main-container {
+            width: 94%;
+            margin: auto;
+            padding: 20px 0 40px 0;
+            text-align: center;
+        }
+
+        .page-title {
+            color: #f3e9d2;
+            font-size: 34px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .top-btn {
+            background-color: #f3e9d2;
+            color: #1f3b2d;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+            transition: 0.2s;
+        }
+
+        #gamesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .game-card {
+            width: 290px;
+            background-color: #f8f3e8;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 7px 20px rgba(0,0,0,0.22);
+            color: #2b2b2b;
+            text-align: left;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+            .game-card:hover {
+                transform: translateY(-10px) scale(1.03);
+                box-shadow: 0 16px 30px rgba(0,0,0,0.28);
+            }
+
+        .game-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-content {
+            padding: 14px;
+            background: linear-gradient(to bottom, #f8f3e8 0%, #d9e7dc 100%);
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f3b2d;
+            margin-bottom: 12px;
+            min-height: 44px;
+            text-align: center;
+        }
+
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .price-box, .review-box {
+            flex: 1;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .price-box {
+            background-color: #ede4cf;
+        }
+
+        .review-box {
+            background-color: #bfd3c2;
+        }
+
+        .small-title {
+            font-size: 11px;
+            color: #5e5a50;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .main-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1f3b2d;
+        }
+
+        .details-box {
+            background-color: #ede4cf;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        .detail-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #1f3b2d;
+        }
+
+        .tags-container {
+            margin-bottom: 12px;
+            min-height: 52px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #d8ccb2;
+            color: #1f3b2d;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            margin: 2px;
+            font-weight: 600;
+        }
+
+        .platforms {
+            margin-bottom: 14px;
+        }
+
+        .platform {
+            display: inline-block;
+            background-color: #8fae96;
+            color: #1f3b2d;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .card-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .add-btn {
+            background-color: #2f5a43;
+            color: #f8f3e8;
+        }
+
+        .steam-link {
+            display: block;
+            text-align: center;
+            background-color: #d8ccb2;
+            color: #1f3b2d;
+            text-decoration: none;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+    </style>
+
+    <script>
+        let gamesForServer = [];
+
+        $(document).ready(function () {
+
+            showUserName();
+
+            $("#logoutBtn").click(logoutFunc);
+
+            $("#loadBtn").click(loadGamesFunc);
+
+            $("#createGameBtn").click(function () {
+                if (isUserLoggedIn() == false) {
+                    goToLogin();
+                    return;
+                }
+
+                window.location.href = "NewGames.html";
+            });
+
+            $("#myGamesBtn").click(function () {
+                if (isUserLoggedIn() == false) {
+                    goToLogin();
+                    return;
+                }
+
+                window.location.href = "MyGames.html";
+            });
+
+            $(document).on("click", ".add-btn", function () {
+                if (isUserLoggedIn() == false) {
+                    goToLogin();
+                    return;
+                }
+
+                let index = $(this).attr("data-index");
+                addToCart(index);
+            });
+        });
+
+        window.onpageshow = function () {
+            showUserName();
+            $("#logoutBtn").off().click(logoutFunc);
+        };
+
+        function isUserLoggedIn() {
+            let user = JSON.parse(localStorage.getItem("user"));
+
+            if (user == null) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function goToLogin() {
+            window.location.href = "LoginPage.html";
+        }
+
+        function showUserName() {
+            let user = JSON.parse(localStorage.getItem("user"));
+
+            if (user != null) {
+                $("#helloUser").html("Hello " + (user.name || user.Name));
+            }
+            else {
+                $("#helloUser").html("Hello Guest");
+            }
+        }
+
+        function logoutFunc() {
+            localStorage.clear();
+            window.location.href = "LoginPage.html";
+        }
+
+        function loadGamesFunc() {
+            let api = "../steamData.json";
+            ajaxCall("GET", api, "", successCB, errorCB);
+        }
+
+        function successCB(games) {
+            $("#gamesContainer").empty();
+            gamesForServer = [];
+
+            for (let i = 0; i < games.length; i++) {
+                let game = games[i];
+
+                let tagsHtml = "";
+                for (let j = 0; j < game.tags.length && j < 3; j++) {
+                    tagsHtml += `<span class="tag">${game.tags[j]}</span>`;
+                }
+
+                let platformsHtml = "";
+                if (game.windows) platformsHtml += `<span class="platform">Windows</span>`;
+                if (game.mac) platformsHtml += `<span class="platform">Mac</span>`;
+                if (game.linux) platformsHtml += `<span class="platform">Linux</span>`;
+
+                let priceText = game.price == 0 ? "Free" : "$" + game.price;
+                let releaseText = game.releaseDate ? game.releaseDate : "Not available";
+
+                let gameForServer = {
+                    id: game.id,
+                    name: game.name,
+                    steamUrl: game.steamUrl,
+                    image: game.capsuleImage,
+                    releaseDate: game.releaseDate,
+                    reviewSummary: game.reviewSummary,
+                    price: game.price,
+                    tags: game.tags,
+                    windows: game.windows,
+                    mac: game.mac,
+                    linux: game.linux
+                };
+
+                gamesForServer.push(gameForServer);
+
+                let card = `
+                        <div class="game-card">
+                            <img class="game-image" src="${game.capsuleImage}">
+
+                            <div class="game-content">
+                                <div class="game-title">${game.name}</div>
+
+                                <div class="top-info">
+                                    <div class="price-box">
+                                        <div class="small-title">Price</div>
+                                        <div class="main-value">${priceText}</div>
+                                    </div>
+
+                                    <div class="review-box">
+                                        <div class="small-title">Reviews</div>
+                                        <div class="main-value">${game.reviewSummary}</div>
+                                    </div>
+                                </div>
+
+                                <div class="details-box">
+                                    <div class="detail-line">
+                                        <span>Release:</span>
+                                        <span>${releaseText}</span>
+                                    </div>
+                                    <div class="detail-line">
+                                        <span>ID:</span>
+                                        <span>${game.id}</span>
+                                    </div>
+                                </div>
+
+                                <div class="tags-container">${tagsHtml}</div>
+                                <div class="platforms">${platformsHtml}</div>
+
+                                <div class="card-buttons">
+                                    <button class="card-btn add-btn" data-index="${i}">
+                                        ADD TO CART
+                                    </button>
+
+                                    <a class="steam-link" href="${game.steamUrl}" target="_blank">
+                                        Open on Steam
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                $("#gamesContainer").append(card);
+            }
+        }
+
+        function addToCart(index) {
+            let game = gamesForServer[index];
+            let api = 'https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games';
+
+            ajaxCall("POST", api, JSON.stringify(game), addSuccessCB, errorCB);
+        }
+
+        function addSuccessCB(data) {
+            if (data == true) {
+                alert("The game was added successfully");
+            } else {
+                alert("The game already exists in the list");
+            }
+        }
+
+        function errorCB(xhr, status, error) {
+            alert("AJAX ERROR");
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <div id="helloUser" class="hello-user"></div>
+        <button id="logoutBtn">LOG OUT</button>
+    </div>
+
+    <div class="main-container">
+        <div class="page-title">STEAM GAMES</div>
+
+        <div class="top-buttons">
+            <button id="loadBtn" class="top-btn">LOAD GAMES</button>
+            <button id="myGamesBtn" class="top-btn">MY GAMES</button>
+            <button id="createGameBtn" class="top-btn">CREATE GAMES</button>
+        </div>
+
+        <div id="gamesContainer"></div>
+    </div>
+
+</body>
+</html>

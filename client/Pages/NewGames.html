@@ -1,0 +1,590 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Create Or Update Game</title>
+
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background-color: #1f3b2d;
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            width: 170px;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background-color: #f3e9d2;
+            color: #1f3b2d;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mainButtons {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .mainButtons button {
+            width: 260px;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            background-color: #f3e9d2;
+            color: #1f3b2d;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .popupBox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.55);
+            overflow-y: auto;
+            padding: 30px 0;
+            box-sizing: border-box;
+        }
+
+        .formBox {
+            width: 500px;
+            background-color: #f8f3e8;
+            padding: 30px;
+            border-radius: 18px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f3b2d;
+        }
+
+        .row {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1f3b2d;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            box-sizing: border-box;
+        }
+
+        .checks {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .checks label {
+            font-weight: normal;
+        }
+
+        .checks input {
+            width: auto;
+        }
+
+        .formBox button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: #2f5a43;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .closeBtn {
+            background-color: #8b3a3a !important;
+        }
+
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .inputError {
+            border: 2px solid red;
+        }
+
+        #selectedTags, #updateSelectedTags {
+            margin-top: 10px;
+            min-height: 30px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #bfd3c2;
+            color: #1f3b2d;
+            padding: 6px 10px;
+            border-radius: 15px;
+            margin: 3px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        let selectedTags = [];
+        let updateSelectedTags = [];
+
+        $(document).ready(function () {
+            loadTags();
+
+            $("#backBtn").click(function () {
+                window.location.href = "index.html";
+            });
+
+            $("#showAddBtn").click(function () {
+                clearErrors();
+                $("#addBox").show();
+            });
+
+            $("#showUpdateBtn").click(function () {
+                clearErrors();
+                $("#updateBox").show();
+            });
+
+            $("#closeAddBtn").click(function () {
+                $("#addBox").hide();
+            });
+
+            $("#closeUpdateBtn").click(function () {
+                $("#updateBox").hide();
+            });
+
+            $("#addGameForm").submit(addGameFunc);
+            $("#updateGameForm").submit(updateGameFunc);
+
+            $("#addTagBtn").click(addTagFunc);
+            $("#updateAddTagBtn").click(updateAddTagFunc);
+        });
+
+        function loadTags() {
+            let api = "../steamData.json";
+            ajaxCall("GET", api, "", loadTagsSuccess, errorCB);
+        }
+
+        function loadTagsSuccess(games) {
+            let allTags = [];
+
+            for (let i = 0; i < games.length; i++) {
+                for (let j = 0; j < games[i].tags.length; j++) {
+                    if (!allTags.includes(games[i].tags[j])) {
+                        allTags.push(games[i].tags[j]);
+                    }
+                }
+            }
+
+            allTags.sort();
+
+            for (let i = 0; i < allTags.length; i++) {
+                $("#tagsList").append(`<option value="${allTags[i]}">${allTags[i]}</option>`);
+                $("#updateTagsList").append(`<option value="${allTags[i]}">${allTags[i]}</option>`);
+            }
+        }
+
+        function addTagFunc() {
+            let tag = $("#tagsList").val();
+
+            if (tag != "" && !selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                showSelectedTags();
+            }
+        }
+
+        function updateAddTagFunc() {
+            let tag = $("#updateTagsList").val();
+
+            if (tag != "" && !updateSelectedTags.includes(tag)) {
+                updateSelectedTags.push(tag);
+                showUpdateSelectedTags();
+            }
+        }
+
+        function showSelectedTags() {
+            $("#selectedTags").empty();
+
+            for (let i = 0; i < selectedTags.length; i++) {
+                $("#selectedTags").append(`<span class="tag" onclick="removeTag('${selectedTags[i]}')">${selectedTags[i]} x</span>`);
+            }
+        }
+
+        function showUpdateSelectedTags() {
+            $("#updateSelectedTags").empty();
+
+            for (let i = 0; i < updateSelectedTags.length; i++) {
+                $("#updateSelectedTags").append(`<span class="tag" onclick="removeUpdateTag('${updateSelectedTags[i]}')">${updateSelectedTags[i]} x</span>`);
+            }
+        }
+
+        function removeTag(tag) {
+            let newTags = [];
+
+            for (let i = 0; i < selectedTags.length; i++) {
+                if (selectedTags[i] != tag) {
+                    newTags.push(selectedTags[i]);
+                }
+            }
+
+            selectedTags = newTags;
+            showSelectedTags();
+        }
+
+        function removeUpdateTag(tag) {
+            let newTags = [];
+
+            for (let i = 0; i < updateSelectedTags.length; i++) {
+                if (updateSelectedTags[i] != tag) {
+                    newTags.push(updateSelectedTags[i]);
+                }
+            }
+
+            updateSelectedTags = newTags;
+            showUpdateSelectedTags();
+        }
+
+        function addGameFunc(e) {
+            e.preventDefault();
+
+            clearErrors();
+
+            let id = $("#id").val();
+            let name = $("#name").val();
+            let steamUrl = $("#steamUrl").val();
+            let image = $("#image").val();
+            let releaseDate = $("#releaseDate").val();
+            let reviewSummary = $("#reviewSummary").val();
+            let price = $("#price").val();
+
+            if (validateGame(id, name, steamUrl, image, price, selectedTags, "") == false) {
+                return;
+            }
+
+            let game = {
+                Id: Number(id),
+                Name: name,
+                SteamUrl: steamUrl,
+                Image: image,
+                ReleaseDate: releaseDate,
+                ReviewSummary: reviewSummary,
+                Price: Number(price),
+                Tags: selectedTags,
+                Windows: $("#windows").is(":checked"),
+                Mac: $("#mac").is(":checked"),
+                Linux: $("#linux").is(":checked")
+            };
+
+            let api = "https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games";
+            ajaxCall("POST", api, JSON.stringify(game), addGameSuccess, errorCB);
+        }
+
+        function updateGameFunc(e) {
+            e.preventDefault();
+
+            clearErrors();
+
+            let oldId = $("#updateOldId").val();
+            let id = $("#updateId").val();
+            let name = $("#updateName").val();
+            let steamUrl = $("#updateSteamUrl").val();
+            let image = $("#updateImage").val();
+            let releaseDate = $("#updateReleaseDate").val();
+            let reviewSummary = $("#updateReviewSummary").val();
+            let price = $("#updatePrice").val();
+
+            if (oldId == "" || isNaN(oldId)) {
+                showError("updateOldId", "Id of game to update is required and must be a number");
+                return;
+            }
+
+            if (validateGame(id, name, steamUrl, image, price, updateSelectedTags, "update") == false) {
+                return;
+            }
+
+            let game = {
+                Id: Number(id),
+                Name: name,
+                SteamUrl: steamUrl,
+                Image: image,
+                ReleaseDate: releaseDate,
+                ReviewSummary: reviewSummary,
+                Price: Number(price),
+                Tags: updateSelectedTags,
+                Windows: $("#updateWindows").is(":checked"),
+                Mac: $("#updateMac").is(":checked"),
+                Linux: $("#updateLinux").is(":checked")
+            };
+
+            let api = "https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games/" + oldId;
+            ajaxCall("PUT", api, JSON.stringify(game), updateGameSuccess, errorCB);
+        }
+
+        function validateGame(id, name, steamUrl, image, price, tags, prefix) {
+            let isValid = true;
+
+            if (id == "" || isNaN(id)) {
+                showError(prefix + "Id", "Id is required and must be a number");
+                isValid = false;
+            }
+
+            if (name == "") {
+                showError(prefix + "Name", "Name is required");
+                isValid = false;
+            }
+
+            if (steamUrl == "") {
+                showError(prefix + "SteamUrl", "SteamUrl is required");
+                isValid = false;
+            }
+
+            if (image == "") {
+                showError(prefix + "Image", "Image is required");
+                isValid = false;
+            }
+
+            if (price == "" || isNaN(price) || Number(price) < 0 || Number(price) > 100) {
+                showError(prefix + "Price", "Price must be a number between 0 and 100");
+                isValid = false;
+            }
+
+            if (tags.length == 0) {
+                $("#" + prefix + "TagsError").html("Choose at least one tag");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function addGameSuccess(data) {
+            if (data == true) {
+                alert("The game was added successfully");
+                $("#addGameForm")[0].reset();
+                selectedTags = [];
+                showSelectedTags();
+                $("#addBox").hide();
+            }
+            else {
+                alert("The game already exists or was not added");
+            }
+        }
+
+        function updateGameSuccess(data) {
+            if (data == true) {
+                alert("The game was updated successfully");
+                $("#updateGameForm")[0].reset();
+                updateSelectedTags = [];
+                showUpdateSelectedTags();
+                $("#updateBox").hide();
+            }
+            else {
+                alert("The game was not updated");
+            }
+        }
+
+        function showError(id, message) {
+            $("#" + id).addClass("inputError");
+            $("#" + id + "Error").html(message);
+        }
+
+        function clearErrors() {
+            $("input").removeClass("inputError");
+            $(".error").html("");
+        }
+
+        function errorCB(xhr, status, error) {
+            alert("Error");
+            console.log(xhr);
+            console.log(status);
+            console.log(error);
+        }
+    </script>
+</head>
+
+<body>
+
+    <button type="button" id="backBtn">BACK TO INDEX</button>
+
+    <div class="mainButtons">
+        <button type="button" id="showAddBtn">CREATE NEW GAME</button>
+        <button type="button" id="showUpdateBtn">UPDATE EXISTING GAME</button>
+    </div>
+
+    <div id="addBox" class="popupBox">
+        <div class="formBox">
+            <h2>Add New Game</h2>
+
+            <form id="addGameForm">
+
+                <div class="row">
+                    <label>Id</label>
+                    <input type="text" id="id">
+                    <div id="IdError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Name</label>
+                    <input type="text" id="name">
+                    <div id="NameError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>SteamUrl</label>
+                    <input type="text" id="steamUrl">
+                    <div id="SteamUrlError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Image</label>
+                    <input type="text" id="image">
+                    <div id="ImageError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>ReleaseDate</label>
+                    <input type="text" id="releaseDate">
+                </div>
+
+                <div class="row">
+                    <label>ReviewSummary</label>
+                    <input type="text" id="reviewSummary">
+                </div>
+
+                <div class="row">
+                    <label>Price</label>
+                    <input type="text" id="price">
+                    <div id="PriceError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Tags</label>
+                    <select id="tagsList">
+                        <option value="">Choose tag</option>
+                    </select>
+                    <button type="button" id="addTagBtn">ADD TAG</button>
+                    <div id="selectedTags"></div>
+                    <div id="TagsError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Platforms</label>
+                    <div class="checks">
+                        <label><input type="checkbox" id="windows"> Windows</label>
+                        <label><input type="checkbox" id="mac"> Mac</label>
+                        <label><input type="checkbox" id="linux"> Linux</label>
+                    </div>
+                </div>
+
+                <button type="submit">SUBMIT</button>
+                <button type="button" id="closeAddBtn" class="closeBtn">CLOSE</button>
+
+            </form>
+        </div>
+    </div>
+
+    <div id="updateBox" class="popupBox">
+        <div class="formBox">
+            <h2>Update Game</h2>
+
+            <form id="updateGameForm">
+
+                <div class="row">
+                    <label>Id of game to update</label>
+                    <input type="text" id="updateOldId">
+                    <div id="updateOldIdError" class="error"></div>
+                </div>
+                <div class="row">
+                    <label>New Id</label>
+                    <input type="text" id="updateId">
+                    <div id="updateIdError" class="error"></div>
+                </div>
+
+
+
+                <div class="row">
+                    <label>Name</label>
+                    <input type="text" id="updateName">
+                    <div id="updateNameError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>SteamUrl</label>
+                    <input type="text" id="updateSteamUrl">
+                    <div id="updateSteamUrlError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Image</label>
+                    <input type="text" id="updateImage">
+                    <div id="updateImageError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>ReleaseDate</label>
+                    <input type="text" id="updateReleaseDate">
+                </div>
+
+                <div class="row">
+                    <label>ReviewSummary</label>
+                    <input type="text" id="updateReviewSummary">
+                </div>
+
+                <div class="row">
+                    <label>Price</label>
+                    <input type="text" id="updatePrice">
+                    <div id="updatePriceError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Tags</label>
+                    <select id="updateTagsList">
+                        <option value="">Choose tag</option>
+                    </select>
+                    <button type="button" id="updateAddTagBtn">ADD TAG</button>
+                    <div id="updateSelectedTags"></div>
+                    <div id="updateTagsError" class="error"></div>
+                </div>
+
+                <div class="row">
+                    <label>Platforms</label>
+                    <div class="checks">
+                        <label><input type="checkbox" id="updateWindows"> Windows</label>
+                        <label><input type="checkbox" id="updateMac"> Mac</label>
+                        <label><input type="checkbox" id="updateLinux"> Linux</label>
+                    </div>
+                </div>
+
+                <button type="submit">UPDATE</button>
+                <button type="button" id="closeUpdateBtn" class="closeBtn">CLOSE</button>
+
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

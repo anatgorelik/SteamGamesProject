@@ -1,0 +1,473 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>My Games</title>
+
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1f3b2d;
+        }
+
+        .main-container {
+            width: 94%;
+            margin: auto;
+            padding: 30px 0 40px 0;
+            text-align: center;
+        }
+
+        .page-title {
+            color: #f3e9d2;
+            font-size: 34px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .top-btn {
+            background-color: #f3e9d2;
+            color: #1f3b2d;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+            transition: 0.2s;
+        }
+
+            .top-btn:hover {
+                background-color: #e8dcc0;
+                transform: translateY(-2px);
+            }
+
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 26px;
+        }
+
+        #searchTB {
+            width: 260px;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            background-color: #f8f3e8;
+            color: #1f3b2d;
+        }
+
+        #searchBtn {
+            background-color: #d8ccb2;
+            color: #1f3b2d;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            #searchBtn:hover {
+                background-color: #cdbf9f;
+            }
+
+        #showAllBtn {
+            background-color: #8fae96;
+            color: #1f3b2d;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            #showAllBtn:hover {
+                background-color: #7f9f87;
+            }
+
+        #messageDiv {
+            color: #f3e9d2;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+
+        #gamesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .game-card {
+            width: 290px;
+            background-color: #f8f3e8;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 7px 20px rgba(0,0,0,0.22);
+            color: #2b2b2b;
+            text-align: left;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+            .game-card:hover {
+                transform: translateY(-10px) scale(1.03);
+                box-shadow: 0 16px 30px rgba(0,0,0,0.28);
+            }
+
+        .game-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-content {
+            padding: 14px;
+            background: linear-gradient(to bottom, #f8f3e8 0%, #d9e7dc 100%);
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f3b2d;
+            margin-bottom: 12px;
+            min-height: 44px;
+            text-align: center;
+        }
+
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .price-box, .review-box {
+            flex: 1;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .price-box {
+            background-color: #ede4cf;
+        }
+
+        .review-box {
+            background-color: #bfd3c2;
+        }
+
+        .small-title {
+            font-size: 11px;
+            color: #5e5a50;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .main-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1f3b2d;
+        }
+
+        .details-box {
+            background-color: #ede4cf;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        .detail-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #1f3b2d;
+        }
+
+            .detail-line:last-child {
+                margin-bottom: 0;
+            }
+
+        .tags-title,
+        .platforms-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1f3b2d;
+            margin-bottom: 6px;
+        }
+
+        .tags-container {
+            margin-bottom: 12px;
+            min-height: 52px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #d8ccb2;
+            color: #1f3b2d;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            margin: 2px;
+            font-weight: 600;
+        }
+
+        .platforms {
+            margin-bottom: 14px;
+        }
+
+        .platform {
+            display: inline-block;
+            background-color: #8fae96;
+            color: #1f3b2d;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .card-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .delete-btn {
+            background-color: #8b2c2c;
+            color: #f8f3e8;
+        }
+
+            .delete-btn:hover {
+                background-color: #6f2323;
+            }
+
+        .steam-link {
+            display: block;
+            text-align: center;
+            background-color: #d8ccb2;
+            color: #1f3b2d;
+            text-decoration: none;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+            .steam-link:hover {
+                background-color: #cdbf9f;
+            }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            loadMyGamesFunc();
+
+            $("#backBtn").click(function () {
+                window.location.href = "index.html";
+            });
+
+            $("#searchBtn").click(searchGamesFunc);
+
+            $("#showAllBtn").click(function () {
+                $("#searchTB").val("");
+                loadMyGamesFunc();
+            });
+
+            $(document).on("click", ".delete-btn", function () {
+                let id = $(this).attr("data-id");
+                deleteGame(id);
+            });
+        });
+
+        function loadMyGamesFunc() {
+            let api = 'https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games';
+            ajaxCall("GET", api, "", successCB, errorCB);
+        }
+
+        function searchGamesFunc() {
+            let name = $("#searchTB").val().trim();
+            let api = "https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games/getByName" + encodeURIComponent(name);
+            ajaxCall("GET", api, "", searchSuccessCB, errorCB);
+        }
+
+        function successCB(games) {
+            renderGames(games);
+        }
+
+        function searchSuccessCB(games) {
+            if (games.length == 0) {
+                $("#gamesContainer").empty();
+                $("#messageDiv").html("No games match your search.");
+            }
+            else {
+                renderGames(games);
+            }
+        }
+
+        function renderGames(games) {
+            $("#gamesContainer").empty();
+            $("#messageDiv").html("");
+
+            if (games.length == 0) {
+                $("#messageDiv").html("No games to display.");
+                return;
+            }
+
+            for (let i = 0; i < games.length; i++) {
+                let game = games[i];
+
+                let tagsHtml = "";
+                if (game.tags != null) {
+                    for (let j = 0; j < game.tags.length && j < 3; j++) {
+                        tagsHtml += `<span class="tag">${game.tags[j]}</span>`;
+                    }
+                }
+
+                let platformsHtml = "";
+                if (game.windows) {
+                    platformsHtml += `<span class="platform">Windows</span>`;
+                }
+                if (game.mac) {
+                    platformsHtml += `<span class="platform">Mac</span>`;
+                }
+                if (game.linux) {
+                    platformsHtml += `<span class="platform">Linux</span>`;
+                }
+
+                let priceText = game.price == 0 ? "Free" : "$" + game.price;
+                let releaseText = game.releaseDate ? game.releaseDate : "Not available";
+
+                let card = `
+                        <div class="game-card">
+                            <img class="game-image" src="${game.image}" alt="${game.name}">
+
+                            <div class="game-content">
+                                <div class="game-title">${game.name}</div>
+
+                                <div class="top-info">
+                                    <div class="price-box">
+                                        <div class="small-title">Price</div>
+                                        <div class="main-value">${priceText}</div>
+                                    </div>
+
+                                    <div class="review-box">
+                                        <div class="small-title">Reviews</div>
+                                        <div class="main-value">${game.reviewSummary}</div>
+                                    </div>
+                                </div>
+
+                                <div class="details-box">
+                                    <div class="detail-line">
+                                        <span><strong>Release:</strong></span>
+                                        <span>${releaseText}</span>
+                                    </div>
+
+                                    <div class="detail-line">
+                                        <span><strong>ID:</strong></span>
+                                        <span>${game.id}</span>
+                                    </div>
+                                </div>
+
+                                <div class="tags-title">Top Tags</div>
+                                <div class="tags-container">
+                                    ${tagsHtml}
+                                </div>
+
+                                <div class="platforms-title">Platforms</div>
+                                <div class="platforms">
+                                    ${platformsHtml}
+                                </div>
+
+                                <div class="card-buttons">
+                                    <button class="card-btn delete-btn" data-id="${game.id}">
+                                        DELETE
+                                    </button>
+
+                                    <a class="steam-link" href="${game.steamUrl}" target="_blank">
+                                        OPEN ON STEAM
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                $("#gamesContainer").append(card);
+            }
+        }
+
+        function deleteGame(id) {
+            let api = 'https://proj.ruppin.ac.il/cgroup30/test2/tar1/api/Games/' + id;
+            ajaxCall("DELETE", api, "", deleteSuccessCB, errorCB);
+        }
+
+        function deleteSuccessCB(data) {
+            if (data == true) {
+                alert("Game deleted successfully");
+                loadMyGamesFunc();
+            }
+            else {
+                alert("Game not found");
+            }
+        }
+
+        function errorCB(err) {
+            console.log(err);
+            alert("There was a problem loading your games.");
+        }
+    </script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="page-title">MY GAMES</div>
+
+        <div class="top-buttons">
+            <button id="backBtn" class="top-btn">BACK TO STEAM GAMES</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchTB" placeholder="Enter game name substring" />
+            <button id="searchBtn">SEARCH</button>
+            <button id="showAllBtn">SHOW ALL</button>
+        </div>
+
+        <div id="messageDiv"></div>
+
+        <div id="gamesContainer"></div>
+    </div>
+</body>
+</html>
